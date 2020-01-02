@@ -45,14 +45,21 @@ function equalConstTime(b1, b2) {
 /* This must check if we're in the browser or
 not, since the functions are different and does
 not convert using browserify */
-function randomBytes(size) {
-  var arr = new Uint8Array(size);
-  if (typeof window === 'undefined') {
-    return Buffer.from(nodeCrypto.randomBytes(size));
-  } else {
-    browserCrypto.getRandomValues(arr);
-  }
-  return Buffer.from(arr);
+// function randomBytes(size) {
+//   var arr = new Uint8Array(size);
+//   if (typeof window === 'undefined') {
+//     return Buffer.from(nodeCrypto.randomBytes(size));
+//   } else {
+//     browserCrypto.getRandomValues(arr);
+//   }
+//   return Buffer.from(arr);
+// }
+function randomBytes(n) {
+    let bytes = [];
+    for (; n > 0; n--) {
+        bytes.push(Math.floor(Math.random() * 256));
+    }
+    return Buffer.from(bytes);
 }
 
 function sha512(msg) {
@@ -78,13 +85,11 @@ function getAes(op) {
       } else {
         if (op === 'encrypt') {
           var cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, iv);
-          cipher.update(data);
-          resolve(cipher.final());
+          resolve(Buffer.concat([cipher.update(data),cipher.final()]));
         }
         else if (op === 'decrypt') {
           var decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, iv);
-          decipher.update(data);
-          resolve(decipher.final());
+          resolve(Buffer.concat([decipher.update(data),decipher.final()]));
         }
       }
     });
